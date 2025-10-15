@@ -20,14 +20,14 @@
 
 variable "args" {
   type        = list(string)
-  description = "Arguments to command. If args is not defined in user data, it defaults to the container image cmd, unless command is defined in user data, in which case it defaults to an empty list."
+  description = "Arguments to the image's `ENTRYPOINT` (or `var.command` if defined). If this is *not* defined, it defaults to the image's `CMD`, unless `var.command` is defined, in which case it is ignored."
 
   default = null
 }
 
 variable "command" {
   type        = list(string)
-  description = "Override of the image's entrypoint."
+  description = "Override of the image's `ENTRYPOINT`."
 
   default = null
 }
@@ -51,7 +51,7 @@ variable "env" {
     name  = string
     value = string
   }))
-  description = "The names and values of environment variables to be passed to `command`."
+  description = "The names and values of environment variables to be passed to the image's `ENTRYPOINT` (or `var.command` if defined)."
 
   default = null
 }
@@ -73,8 +73,8 @@ variable "env-from" {
     ssm = optional(object({
       base64-encode = optional(bool, null)
       name          = optional(string, null)
-      path          = string
       optional      = optional(bool, null)
+      path          = string
     }), null)
     secrets-manager = optional(object({
       base64-encode = optional(bool, null)
@@ -83,21 +83,21 @@ variable "env-from" {
       secret-id     = string
     }), null)
   }))
-  description = "Environment variables to be passed to command, to be retrieved from the given sources."
+  description = "Environment variables to be passed to the image's `ENTRYPOINT` (or `var.command` if defined), to be retrieved from the given sources."
 
   default = null
 }
 
 variable "init-scripts" {
   type        = list(string)
-  description = "A list of scripts to run on boot. They must start with #! and have a valid interpreter available in the image. For lightweight images that have no shell in the container image they are derived from, /.easyto/bin/busybox sh can be used. The AMI will always have /.easyto/bin/busybox available as a source of utilities that can be used in the scripts. Init scripts run just before any services have started and command is executed."
+  description = "A list of scripts to run on boot. They must start with `#!` and have a valid interpreter available in the image. For lightweight images that have no shell in the container image they are derived from, `#!/.easyto/bin/busybox sh` can be used. The AMI will always have `/.easyto/bin/busybox available` as a source of utilities that can be used in the scripts. Init scripts run just before any services have started and the entry point is executed."
 
   default = null
 }
 
 variable "replace-init" {
   type        = bool
-  description = "If true, command will replace init when executed. This may be useful if you want to run your own init process. However, easyto init will still do everything leading up to the execution of command, for example formatting and mounting filesystems defined in volumes and setting environment variables."
+  description = "If `true`, the entry point will replace `init` when executed. This may be useful if you want to run your own init process. However, easyto init will still do everything leading up to the execution of the entry point, for example formatting and mounting filesystems defined in volumes, and setting environment variables."
 
   default = null
 }
@@ -125,7 +125,7 @@ variable "sysctls" {
     name  = string
     value = string
   }))
-  description = "The names and values of sysctls to set before starting `command`."
+  description = "The names and values of sysctls to set before starting the entry point."
 
   default = null
 }
@@ -192,7 +192,7 @@ variable "volumes" {
 
 variable "working-dir" {
   type        = string
-  description = "The directory in which command will be run. This defaults to the container image's workdir if it is defined, or else /."
+  description = "The directory in which the entry point will be run. This defaults to the container image's `WORKDIR` if it is defined, or else `/`."
 
   default = null
 }
