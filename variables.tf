@@ -133,10 +133,17 @@ variable "sysctls" {
 variable "volumes" {
   type = list(object({
     ebs = optional(object({
-      device  = string
-      fs-type = string
+      attachment = optional(object({
+        tags = list(object({
+          key   = string
+          value = optional(string)
+        }))
+        timeout = optional(number)
+      }))
+      device = string
       mount = object({
         destination = string
+        fs-type     = string
         group-id    = optional(number, null)
         mode        = optional(string, null)
         options     = optional(list(string), null)
