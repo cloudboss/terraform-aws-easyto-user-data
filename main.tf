@@ -19,19 +19,27 @@
 # THE SOFTWARE.
 
 locals {
+  env-from = [for ev in var.env-from : {
+    for k, v in ev : k => v if v != null
+  }]
+
+  volumes = [for vol in var.volumes : {
+    for k, v in vol : k => v if v != null
+  }]
+
   user_data = {
     args                  = var.args
     command               = var.command
     debug                 = var.debug
     disable-services      = var.disable-services
     env                   = var.env
-    env-from              = var.env-from
+    env-from              = local.env-from
     init-scripts          = var.init-scripts
     replace-init          = var.replace-init
     security              = var.security
     shutdown-grace-period = var.shutdown-grace-period
     sysctls               = var.sysctls
-    volumes               = var.volumes
+    volumes               = local.volumes
     working-dir           = var.working-dir
   }
 }
