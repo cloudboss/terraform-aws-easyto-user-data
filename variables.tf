@@ -86,6 +86,18 @@ variable "env-from" {
   description = "Environment variables to be passed to the image's `ENTRYPOINT` (or `var.command` if defined), to be retrieved from the given sources."
 
   default = null
+
+  validation {
+    condition = alltrue([for ev in var.env-from : length([
+      for notnull in [
+        ev.imds != null,
+        ev.s3 != null,
+        ev.ssm != null,
+        ev.secrets-manager != null,
+      ] : notnull if notnull]) == 1
+    ])
+    error_message = "Exactly one of imds, s3, ssm, or secrets-manager must be specified for each env-from."
+  }
 }
 
 variable "init-scripts" {
@@ -188,6 +200,18 @@ variable "volumes" {
   description = "Configuration of volumes."
 
   default = null
+
+  validation {
+    condition = alltrue([for vol in var.volumes : length([
+      for notnull in [
+        vol.ebs != null,
+        vol.s3 != null,
+        vol.ssm != null,
+        vol.secrets-manager != null,
+      ] : notnull if notnull]) == 1
+    ])
+    error_message = "Exactly one of ebs, s3, ssm, or secrets-manager must be specified for each volume."
+  }
 }
 
 variable "working-dir" {
