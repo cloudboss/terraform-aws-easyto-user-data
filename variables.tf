@@ -133,10 +133,7 @@ variable "shutdown-grace-period" {
 }
 
 variable "sysctls" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
+  type        = list(map(string))
   description = "The names and values of sysctls to set before starting the entry point."
 
   default = null
