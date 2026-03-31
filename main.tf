@@ -35,6 +35,7 @@ locals {
     env                   = var.env
     env-from              = local.env-from
     init-scripts          = var.init-scripts
+    modules               = var.modules
     replace-init          = var.replace-init
     security              = var.security
     shutdown-grace-period = var.shutdown-grace-period

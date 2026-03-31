@@ -107,6 +107,13 @@ variable "init-scripts" {
   default = null
 }
 
+variable "modules" {
+  type        = list(string)
+  description = "The names of kernel modules to load."
+
+  default = null
+}
+
 variable "replace-init" {
   type        = bool
   description = "If `true`, the entry point will replace `init` when executed. This may be useful if you want to run your own init process. However, easyto init will still do everything leading up to the execution of the entry point, for example formatting and mounting filesystems defined in volumes, and setting environment variables."
