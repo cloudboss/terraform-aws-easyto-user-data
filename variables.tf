@@ -200,6 +200,18 @@ variable "volumes" {
       optional  = optional(bool, null)
       secret-id = string
     }), null)
+    template = optional(object({
+      content = string
+      mount = object({
+        destination = string
+        group-id    = optional(number, null)
+        mode        = optional(string, null)
+        options     = optional(list(string), null)
+        user-id     = optional(number, null)
+      })
+      optional  = optional(bool)
+      variables = optional(map(any))
+    }), null)
   }))
   description = "Configuration of volumes."
 
@@ -212,9 +224,10 @@ variable "volumes" {
         vol.s3 != null,
         vol.ssm != null,
         vol.secrets-manager != null,
+        vol.template != null,
       ] : notnull if notnull]) == 1
     ])
-    error_message = "Exactly one of ebs, s3, ssm, or secrets-manager must be specified for each volume."
+    error_message = "Exactly one of ebs, s3, ssm, secrets-manager, or template must be specified for each volume."
   }
 }
 
