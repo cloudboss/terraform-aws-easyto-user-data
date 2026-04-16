@@ -19,30 +19,41 @@
 # THE SOFTWARE.
 
 locals {
-  env-from = [for ev in var.env-from : {
-    for k, v in ev : k => v if v != null
+  # Strip out as many null values as possible to reduce user data size.
+  env_from_denulled = [for name, ev in var.env-from :
+    { for k, v in ev : k => v if v != null }
+  ]
+  volumes_denulled_firstpass = [for name, vol in var.volumes :
+    { for k, v in vol : k => v if v != null }
+  ]
+  volumes_denulled = [for vol in local.volumes_denulled_firstpass : {
+    for source_key, source in vol : source_key => merge(
+      { for k, v in source : k => v if v != null && k != "mount" && k != "attachment" },
+      { mount = { for k, v in source.mount : k => v if v != null } },
+      try(source.attachment, null) == null
+      ? {}
+      : { attachment = { for k, v in source.attachment : k => v if v != null } },
+    )
   }]
 
-  volumes = [for vol in var.volumes : {
-    for k, v in vol : k => v if v != null
-  }]
-
-  user_data = {
+  user_data_nully = {
     args                  = var.args
     command               = var.command
     debug                 = var.debug
     disable-services      = var.disable-services
     env                   = var.env
-    env-from              = local.env-from
+    env-from              = local.env_from_denulled
     init-scripts          = var.init-scripts
     modules               = var.modules
     replace-init          = var.replace-init
     security              = var.security
     shutdown-grace-period = var.shutdown-grace-period
     sysctls               = var.sysctls
-    volumes               = local.volumes
+    volumes               = local.volumes_denulled
     working-dir           = var.working-dir
   }
+
+  user_data = { for k, v in local.user_data_nully : k => v if v != null }
 }
 
 output "value" {
